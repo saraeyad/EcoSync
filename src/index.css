@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { border-color: #1e293b; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-background text-slate-100 font-sans antialiased; background-color: #020617; }
+
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: #0a0f1e; }
+  ::-webkit-scrollbar-thumb  { background: #10b981; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #34d399; }
+}
+
+@layer components {
+  .glass {
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(30, 41, 59, 0.8);
+  }
+  .glass-strong {
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(16, 185, 129, 0.12);
+  }
+  .glow-emerald    { box-shadow: 0 0 24px rgba(16,185,129,0.35), 0 0 48px rgba(16,185,129,0.12); }
+  .glow-emerald-sm { box-shadow: 0 0 12px rgba(16,185,129,0.25); }
+  .glow-emerald-lg { box-shadow: 0 0 40px rgba(16,185,129,0.5), 0 0 80px rgba(16,185,129,0.2), 0 0 120px rgba(16,185,129,0.08); }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Shimmer text */
+  .text-shimmer {
+    background: linear-gradient(90deg,
+      #ffffff 0%, #ffffff 30%,
+      #10b981 45%, #34d399 50%, #10b981 55%,
+      #ffffff 70%, #ffffff 100%
+    );
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer-sweep 4s linear infinite;
+  }
+  .text-shimmer-fast {
+    background: linear-gradient(90deg,
+      #94a3b8 0%, #94a3b8 30%,
+      #10b981 45%, #6ee7b7 50%, #10b981 55%,
+      #94a3b8 70%, #94a3b8 100%
+    );
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer-sweep 2.5s linear infinite;
+  }
+  @keyframes shimmer-sweep {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
+
+  @keyframes marquee-left {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes marquee-right {
+    0%   { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+  .marquee-left  { animation: marquee-left  22s linear infinite; }
+  .marquee-right { animation: marquee-right 22s linear infinite; }
+  .marquee-left:hover,
+  .marquee-right:hover { animation-play-state: paused; }
+
+  /* Active nav glow */
+  .nav-glow {
+    box-shadow: 0 0 12px rgba(16,185,129,0.4), inset 0 0 12px rgba(16,185,129,0.05);
+  }
+
+  /* Bento card */
+  .bento-card {
+    @apply glass rounded-2xl p-6 relative overflow-hidden;
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+  }
+  .bento-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 24px 64px rgba(16,185,129,0.1), 0 0 0 1px rgba(16,185,129,0.15);
+  }
+
+  /* Number flip */
+  .flip-enter  { transform: translateY(-100%); opacity: 0; }
+  .flip-active { transform: translateY(0);     opacity: 1; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease; }
+  .flip-exit   { transform: translateY(100%);  opacity: 0; transition: transform 0.25s ease-in, opacity 0.2s ease-in; }
+
+  /* 3D card flip */
+  .flip-card          { perspective: 1000px; }
+  .flip-card-inner    { position: relative; transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; }
+  .flip-card:hover .flip-card-inner,
+  .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+  .flip-card-front,
+  .flip-card-back     { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+  .flip-card-back     { transform: rotateY(180deg); }
+
+  /* Portal overlay */
+  .portal-ring {
+    border-radius: 50%;
+    border: 2px solid rgba(16,185,129,0.6);
+    animation: portal-expand 1s ease-out forwards;
+  }
+  @keyframes portal-expand {
+    from { transform: scale(0); opacity: 1; }
+    to   { transform: scale(20); opacity: 0; }
+  }
+
+  /* Glow pulse ring (for portal) */
+  @keyframes portal-pulse {
+    0%   { transform: scale(1);   opacity: 0.8; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+}
+
+@layer utilities {
+  .bg-hero-pattern {
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(16,185,129,0.18) 0%, rgba(2,6,23,0) 70%);
+  }
+  .perspective-1000 { perspective: 1000px; }
+  .backface-hidden  { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .rotate-y-180     { transform: rotateY(180deg); }
+  .preserve-3d      { transform-style: preserve-3d; }
+}

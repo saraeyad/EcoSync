@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#0d1f3c"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="45" y1="22" x2="148" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#34d399"/>
+      <stop offset="60%"  stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#10b981" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id="softBlur"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
+
+  <!-- Glow halo -->
+  <ellipse cx="90" cy="88" rx="55" ry="55" fill="url(#glow)" filter="url(#blur)"/>
+
+  <!-- Leaf -->
+  <path
+    d="M90 28
+       C114 28, 152 46, 152 86
+       C152 122, 124 152, 90 152
+       C62 152, 44 132, 44 104
+       C44 62, 66 28, 90 28Z"
+    fill="url(#leaf)"
+    opacity="0.97"
+  />
+
+  <!-- Leaf midrib -->
+  <path
+    d="M90 152 C86 130, 78 108, 72 82"
+    stroke="#064e3b"
+    stroke-width="5"
+    stroke-linecap="round"
+    opacity="0.5"
+  />
+
+  <!-- Side veins (subtle) -->
+  <path d="M72 82 C80 78, 92 76, 108 80"   stroke="#065f46" stroke-width="2" stroke-linecap="round" opacity="0.4" fill="none"/>
+  <path d="M78 100 C88 96, 102 95, 116 99" stroke="#065f46" stroke-width="2" stroke-linecap="round" opacity="0.3" fill="none"/>
+
+  <!-- ECG pulse line -->
+  <path
+    d="M50 96 L68 96 L76 74 L84 118 L92 82 L99 96 L122 96"
+    stroke="white"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+    opacity="0.15"
+    filter="url(#softBlur)"
+  />
+  <path
+    d="M50 96 L68 96 L76 74 L84 118 L92 82 L99 96 L122 96"
+    stroke="white"
+    stroke-width="5.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+    opacity="0.92"
+  />
+
+  <!-- Live dot -->
+  <circle cx="122" cy="96" r="6"  fill="white"    opacity="0.95"/>
+  <circle cx="122" cy="96" r="11" fill="white"    opacity="0.18"/>
+  <circle cx="122" cy="96" r="16" fill="#10b981"  opacity="0.1"/>
+</svg>
