@@ -1,7 +1,7 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { useDataLoad } from "../hooks/useDataLoad.ts";
+import { useAppStore } from "../hooks/store.ts";
 import { Preloader } from "../layout/Preloader.tsx";
 import { ProtectedRoute } from "./ProtectedRoute.tsx";
 import {
@@ -14,12 +14,15 @@ import {
 
 function AnimatedRoutes() {
   const location = useLocation();
-  const { loadFactories, loadAlerts, loadCompliance } = useDataLoad();
+  const loadedOnce = useRef(false);
   useEffect(() => {
+    if (loadedOnce.current) return;
+    loadedOnce.current = true;
+    const { loadFactories, loadAlerts, loadCompliance } = useAppStore.getState();
     loadFactories();
     loadAlerts();
     loadCompliance();
-  }, [loadFactories, loadAlerts, loadCompliance]);
+  }, []);
 
   return (
     <AnimatePresence mode="wait">

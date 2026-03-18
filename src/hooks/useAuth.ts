@@ -1,8 +1,7 @@
 import { useAppStore } from "./store.ts";
 
 export function useAuth() {
-  return useAppStore((s) => ({
-    currentUser: s.currentUser,
-    setCurrentUser: s.setCurrentUser,
-  }));
+  const currentUser = useAppStore((s) => s.currentUser);
+  const setCurrentUser = useAppStore((s) => s.setCurrentUser);
+  return { currentUser, setCurrentUser };
 }

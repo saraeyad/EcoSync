@@ -1,8 +1,7 @@
 import { useAppStore } from "./store.ts";
 
 export function useCompliance() {
-  return useAppStore((s) => ({
-    complianceStandards: s.complianceStandards,
-    loadCompliance: s.loadCompliance,
-  }));
+  const complianceStandards = useAppStore((s) => s.complianceStandards);
+  const loadCompliance = useAppStore((s) => s.loadCompliance);
+  return { complianceStandards, loadCompliance };
 }

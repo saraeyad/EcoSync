@@ -1,10 +1,9 @@
 import { useAppStore } from "./store.ts";
 
 export function useEnergyData() {
-  return useAppStore((s) => ({
-    globalEnergyData: s.globalEnergyData,
-    factoryStreams: s.factoryStreams,
-    pushGlobalPoint: s.pushGlobalPoint,
-    pushFactoryPoint: s.pushFactoryPoint,
-  }));
+  const globalEnergyData = useAppStore((s) => s.globalEnergyData);
+  const factoryStreams = useAppStore((s) => s.factoryStreams);
+  const pushGlobalPoint = useAppStore((s) => s.pushGlobalPoint);
+  const pushFactoryPoint = useAppStore((s) => s.pushFactoryPoint);
+  return { globalEnergyData, factoryStreams, pushGlobalPoint, pushFactoryPoint };
 }

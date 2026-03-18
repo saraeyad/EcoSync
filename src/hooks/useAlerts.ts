@@ -4,9 +4,8 @@ import type { AlertType } from "./store.ts";
 export type { AlertType };
 
 export function useAlerts() {
-  return useAppStore((s) => ({
-    alerts: s.alerts,
-    dismissAlert: s.dismissAlert,
-    loadAlerts: s.loadAlerts,
-  }));
+  const alerts = useAppStore((s) => s.alerts);
+  const dismissAlert = useAppStore((s) => s.dismissAlert);
+  const loadAlerts = useAppStore((s) => s.loadAlerts);
+  return { alerts, dismissAlert, loadAlerts };
 }

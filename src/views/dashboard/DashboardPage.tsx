@@ -1,4 +1,4 @@
-import { memo, useEffect, lazy, Suspense, type ReactNode } from "react";
+import { memo, lazy, Suspense, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap,
@@ -329,14 +329,7 @@ function NoDataHint() {
 
 // ── Page root ────────────────────────────────────────────────────────────────
 export function DashboardPage() {
-  const { activeNav, loadFactories, loadAlerts, loadCompliance } =
-    useAppStore();
-
-  useEffect(() => {
-    loadFactories();
-    loadAlerts();
-    loadCompliance();
-  }, [loadFactories, loadAlerts, loadCompliance]);
+  const { activeNav } = useAppStore();
 
   return (
     <motion.div
