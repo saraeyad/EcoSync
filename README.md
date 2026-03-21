@@ -3,7 +3,7 @@
 **EcoSync** is an industrial IoT and sustainability dashboard. It helps teams monitor facilities in real time, track energy and carbon metrics, and stay on top of compliance—all in one place.
 
 ---
-
+live URL :https://eco-sync-git-main-sara-ismails-projects.vercel.app/
 ## Purpose
 
 Companies with multiple sites (factories, plants, energy assets) need a single view of:
