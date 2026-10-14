@@ -1,33 +1,77 @@
 # EcoSync
 
-**EcoSync** is an industrial IoT and sustainability dashboard. It helps teams monitor facilities in real time, track energy and carbon metrics, and stay on top of compliance—all in one place.
+**EcoSync** منصة ويب لمراقبة الاستدامة والطاقة في المنشآت الصناعية — لوحة تحكم IoT تجمع بيانات الطاقة والكربون والامتثال في مكان واحد، بواجهة حديثة وربط مع Supabase.
 
----
-live URL :https://eco-sync-git-main-sara-ismails-projects.vercel.app/
-## Purpose
+**Live demo:** [eco-sync-git-main-sara-ismails-projects.vercel.app](https://eco-sync-git-main-sara-ismails-projects.vercel.app/)
 
-Companies with multiple sites (factories, plants, energy assets) need a single view of:
-
-- **Where** their facilities are and how they’re performing
-- **How** energy and carbon metrics behave over time
-- **Whether** they meet environmental and compliance targets
-- **When** something needs attention (alerts and anomalies)
-
-EcoSync provides that view: a web app where you can see a **global map** of facilities, drill into **live energy and efficiency data**, check **compliance status**, and react to **alerts**—with a modern, responsive UI and a backend (Supabase) ready for real data.
+**حساب تجريبي:** `demo@ecosync.io` / `demo1234`
 
 ---
 
-## Features
+## 1. صورة توضيحية للمشروع وهو شغال
 
-- **Command Center** — KPIs, world map, facility grid, live energy chart, and alerts in one dashboard
-- **Factories** — List and manage facilities; add new sites; export data (CSV/JSON)
-- **Analytics** — Charts and trends for energy, carbon, and efficiency
-- **Global Map** — Geographic view of all facilities with status (online / warning / offline)
-- **Energy Flow** — Per-facility and global energy streams over time
-- **Compliance** — Track standards and pass/fail status
-- **Forecasting** — Trend and target views
-- **Alerts** — Notifications and quick access from the sidebar
-- **Settings & Profile** — User profile, facility management, and data export
+### الصفحة الرئيسية
+
+![EcoSync landing page](docs/demo-landing.webp)
+
+### لوحة التحكم (Command Center)
+
+![EcoSync Command Center dashboard](docs/demo-dashboard.webp)
+
+### أبرز القدرات
+
+![EcoSync platform features](docs/demo-features.webp)
+
+---
+
+## 2. المشكلة التي يحلها والفئة المستهدفة
+
+### المشكلة
+
+الشركات اللي عندها مصانع أو مواقع متعددة غالباً بتواجه:
+
+- بيانات الطاقة والكربون **مبعثرة** بين أنظمة وأجهزة مختلفة
+- صعوبة متابعة **حالة كل منشأة** (أونلاين / تحذير / أوفلاين) في لحظة واحدة
+- تقارير الامتثال البيئي (مثل ISO 14001 و GHG Protocol) بتاخد وقت وجهد يدوي
+- تأخر اكتشاف **الشذوذ والتنبيهات** قبل ما تتحول لمشكلة تشغيلية أو تكلفة أعلى
+
+EcoSync بيوفر **نظرة موحّدة**: خريطة عالمية للمنشآت، مقاييس طاقة وكفاءة مباشرة، حالة امتثال، وتنبيهات — من لوحة واحدة.
+
+### الفئة المستهدفة
+
+| الفئة | ليه EcoSync؟ |
+| --- | --- |
+| **مدراء الاستدامة والطاقة** | متابعة الكربون والطاقة وخطط net-zero |
+| **مشغّلو المنشآت الصناعية** | حالة المواقع، الأحمال، والتنبيهات لحظياً |
+| **فرق الامتثال والجودة** | تتبع المعايير البيئية وتقارير الجاهزية |
+| **شركات متعددة المواقع** | رؤية جغرافية موحّدة لكل الشبكة |
+
+---
+
+## 3. أهم الفيتشرز والتحديات اللي اتحلت
+
+### أهم الفيتشرز اللي اتطوّرت
+
+- **Command Center** — KPIs (حمل الطاقة، منشآت نشطة، تعويض CO₂، تغطية عالمية) + خريطة + مخطط طاقة مباشر + تنبيهات
+- **إدارة المصانع (Factories)** — عرض وإضافة منشآت وتصدير البيانات (CSV / JSON)
+- **Analytics** — رسوم بيانية لاتجاهات الطاقة والكربون والكفاءة
+- **Global Map** — توزيع جغرافي للمنشآت مع حالة التشغيل
+- **Energy Flow** — تدفق الطاقة لكل منشأة وعلى مستوى الشبكة
+- **Compliance** — متابعة معايير الامتثال وحالة النجاح/الفشل
+- **Forecasting** — اتجاهات وأهداف مستقبلية
+- **Alerts** — إشعارات وتنبيهات سريعة من الشريط الجانبي
+- **Landing + Auth** — صفحة تسويقية بمشاهد 3D، وتسجيل دخول مع حماية للـ dashboard
+- **Settings & Profile** — الملف الشخصي وإعدادات الحساب
+
+### التحديات اللي اتحلت
+
+| التحدي | الحل |
+| --- | --- |
+| **Infinite re-render في لوحة التحكم** مع React 19 + Zustand | فصل selectors (قيمة واحدة لكل hook بدل إرجاع object جديد كل مرة) وتحميل البيانات مرة واحدة في الـ router |
+| **أداء الواجهة مع خرائط ورسوم و3D** | Lazy loading للشاشات الثقيلة، وThree.js / R3F للمشاهد البصرية بدون ما تثقل الصفحة كلها من الأول |
+| **بيانات حقيقية من Backend** | دمج Supabase للمصانع والتنبيهات ومعايير الامتثال، مع معالجة أخطاء الاتصال في الواجهة |
+| **تجربة مستخدم مترابطة** | حماية المسارات (Protected Route)، حالة عامة بـ Zustand، وحركات Framer Motion للانتقالات |
+| **نشر على Vercel** | تثبيت Node 20 و`legacy-peer-deps` لتفادي تعارضات الحزم أثناء الـ build |
 
 ---
 
@@ -35,21 +79,36 @@ EcoSync provides that view: a web app where you can see a **global map** of faci
 
 - **React 19** + **TypeScript** + **Vite**
 - **Tailwind CSS** + **Framer Motion**
-- **Zustand** (state) + **React Router**
-- **Supabase** (backend: factories, alerts, compliance)
-- **Recharts** (charts) + **React Three Fiber** (3D / visuals)
-- **React Hook Form** + **Zod** (forms and validation)
+- **Zustand** + **React Router**
+- **Supabase** (factories, alerts, compliance)
+- **Recharts** + **React Three Fiber**
+- **React Hook Form** + **Zod**
 
 ---
 
-## Project Structure (high level)
+## هيكل المشروع
 
-- `src/views/` — Feature-based pages (auth, home, dashboard, settings, profile, error)
-- `src/components/` — Shared UI and 3D components
-- `src/hooks/` — Store and feature hooks (auth, UI, factories, alerts, etc.)
-- `src/services/` — API / Supabase logic (factories, alerts, compliance)
-- `src/config/` — Theme and app config
-- `src/constants/` — Navigation, profile, and other constants
-- `src/router/` — Routes and protected route logic
+- `src/views/` — الصفحات (auth, home, dashboard, settings, profile, error)
+- `src/components/` — مكوّنات UI و 3D مشتركة
+- `src/hooks/` — حالة التطبيق والـ feature hooks
+- `src/services/` — منطق Supabase / API
+- `src/config/` — الثيم وإعدادات التطبيق
+- `src/constants/` — التنقل والبيانات الثابتة
+- `src/router/` — المسارات وحماية الـ dashboard
+- `docs/` — صور الـ demo المستخدمة في الـ README
 
 ---
+
+## التشغيل محلياً
+
+```bash
+npm install
+npm run dev
+```
+
+Build للإنتاج:
+
+```bash
+npm run build
+npm run preview
+```
