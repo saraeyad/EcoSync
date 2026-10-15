@@ -1,3 +1,4 @@
+import { DEMO_ALERTS, isNetworkFetchError } from "../constants/demoData.ts";
 import { supabase } from "../lib/supabase.ts";
 import { mapAlertRow, type AlertRow } from "../lib/supabase-mappers.ts";
 
@@ -6,28 +7,40 @@ type SetState = (partial: object | ((s: object) => object)) => void;
 export function createLoadAlerts(set: SetState) {
   return async function loadAlerts() {
     if (!supabase) {
-      set({ alertsLoaded: true });
+      set({ alerts: DEMO_ALERTS, alertsLoaded: true });
       return;
     }
-    const { data, error } = await supabase
-      .from("alerts")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.warn("[EcoSync] loadAlerts failed:", error.message);
-      set((s: { supabaseError: string | null }) => ({
-        alertsLoaded: true,
-        supabaseError: s.supabaseError || `Alerts: ${error.message}`,
-      }));
-      return;
-    }
-    if (data && data.length > 0) {
-      set({
-        alerts: (data as AlertRow[]).map(mapAlertRow),
-        alertsLoaded: true,
-      });
-    } else {
-      set({ alerts: [], alertsLoaded: true });
+
+    try {
+      const { data, error } = await supabase
+        .from("alerts")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.warn("[EcoSync] loadAlerts failed:", error.message);
+        if (isNetworkFetchError(error.message)) {
+          set({ alerts: DEMO_ALERTS, alertsLoaded: true });
+          return;
+        }
+        set((s: { supabaseError: string | null }) => ({
+          alertsLoaded: true,
+          supabaseError: s.supabaseError || `Alerts: ${error.message}`,
+        }));
+        return;
+      }
+
+      if (data && data.length > 0) {
+        set({
+          alerts: (data as AlertRow[]).map(mapAlertRow),
+          alertsLoaded: true,
+        });
+      } else {
+        set({ alerts: [], alertsLoaded: true });
+      }
+    } catch (err) {
+      console.warn("[EcoSync] loadAlerts threw:", err);
+      set({ alerts: DEMO_ALERTS, alertsLoaded: true });
     }
   };
 }
