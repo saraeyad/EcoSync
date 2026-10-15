@@ -1,49 +1,61 @@
 import { useRef, useEffect, memo } from "react";
 
 interface Particle {
-  x:  number; y:  number;  // world position (0–1 normalised)
-  vx: number; vy: number;  // velocity
-  ox: number; oy: number;  // origin (for spring-back)
-  state: number;           // 0 = dark, 1 = emerald (lerped)
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  ox: number;
+  oy: number;
+  state: number;
   size: number;
-  twinkle: number;         // phase offset for twinkling
+  twinkle: number;
 }
 
-const PARTICLE_COUNT = 180;
-const CONNECTION_DIST = 0.12; // max distance (normalised) to draw a line
-const REPEL_RADIUS   = 0.10;
+const PARTICLE_COUNT =
+  typeof window !== "undefined" && window.innerWidth < 768 ? 48 : 72;
+const CONNECTION_DIST = 0.1;
+const REPEL_RADIUS = 0.1;
 const REPEL_STRENGTH = 0.0025;
-const SPRING_BACK    = 0.04;
-const FRICTION       = 0.88;
+const SPRING_BACK = 0.04;
+const FRICTION = 0.88;
 
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
 function hexToRgb(hex: string): [number, number, number] {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return [r, g, b];
+  return [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
+  ];
 }
 
-const C_SLEEP  = hexToRgb("#7f1d1d"); // very dark crimson
-const C_ACTIVE = hexToRgb("#10b981"); // emerald
-const C_LINE_S = hexToRgb("#3b0d0d"); // dark-red line
-const C_LINE_A = hexToRgb("#059669"); // emerald line
+const C_SLEEP = hexToRgb("#7f1d1d");
+const C_ACTIVE = hexToRgb("#10b981");
+const C_LINE_S = hexToRgb("#3b0d0d");
+const C_LINE_A = hexToRgb("#059669");
 
 export const GlobalParticleField = memo(function GlobalParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouse     = useRef({ nx: -1, ny: -1 }); // normalised mouse pos
-  const scroll    = useRef(0); // 0–1 scroll progress
-  const raf       = useRef(0);
+  const mouse = useRef({ nx: -1, ny: -1 });
+  const scroll = useRef(0);
+  const raf = useRef(0);
   const particles = useRef<Particle[]>([]);
+  const visible = useRef(true);
 
-  // Build particle grid once
   useEffect(() => {
     const list: Particle[] = [];
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const x = Math.random();
       const y = Math.random();
       list.push({
-        x, y, vx: 0, vy: 0, ox: x, oy: y,
+        x,
+        y,
+        vx: 0,
+        vy: 0,
+        ox: x,
+        oy: y,
         state: 0,
         size: 1.2 + Math.random() * 1.8,
         twinkle: Math.random() * Math.PI * 2,
@@ -52,14 +64,18 @@ export const GlobalParticleField = memo(function GlobalParticleField() {
     particles.current = list;
   }, []);
 
-  // Mouse tracking (normalised 0–1)
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       mouse.current.nx = e.clientX / window.innerWidth;
-      mouse.current.ny = e.clientY / window.innerHeight + window.scrollY / document.body.scrollHeight;
+      mouse.current.ny =
+        e.clientY / window.innerHeight +
+        window.scrollY / document.body.scrollHeight;
     };
-    const onLeave = () => { mouse.current.nx = -1; mouse.current.ny = -1; };
-    window.addEventListener("mousemove", onMove);
+    const onLeave = () => {
+      mouse.current.nx = -1;
+      mouse.current.ny = -1;
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
     window.addEventListener("mouseleave", onLeave);
     return () => {
       window.removeEventListener("mousemove", onMove);
@@ -67,7 +83,6 @@ export const GlobalParticleField = memo(function GlobalParticleField() {
     };
   }, []);
 
-  // Scroll progress tracking
   useEffect(() => {
     const onScroll = () => {
       const max = document.body.scrollHeight - window.innerHeight;
@@ -77,47 +92,52 @@ export const GlobalParticleField = memo(function GlobalParticleField() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Main render loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d")!;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
 
     const resize = () => {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    let t = 0;
+    const onVisibility = () => {
+      visible.current = document.visibilityState === "visible";
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
+    let frame = 0;
     const draw = () => {
       raf.current = requestAnimationFrame(draw);
-      t += 0.008;
+      if (!visible.current) return;
+      // Run physics/draw at ~30fps equivalent
+      frame += 1;
+      if (frame % 2 === 1) return;
 
-      const W = canvas.width;
-      const H = canvas.height;
-
-      // Full-page scroll offset so particles stay fixed in viewport
+      const W = window.innerWidth;
+      const H = window.innerHeight;
       const scrollRatio = scroll.current;
-      // Activation wavefront: starts at top, sweeps down as you scroll
-      // At scroll=0 top 20% is active, at scroll=1 all are active
-      const waveY = 0.15 + scrollRatio * 1.1; // 0–1 normalised page height
+      const waveY = 0.15 + scrollRatio * 1.1;
 
       ctx.clearRect(0, 0, W, H);
 
       const ps = particles.current;
       const mx = mouse.current.nx;
-      const my = mouse.current.ny - (window.scrollY / document.body.scrollHeight);
+      const my =
+        mouse.current.ny - window.scrollY / document.body.scrollHeight;
 
-      // ── Update particles ──────────────────────────────────────────────
       for (const p of ps) {
-        // Target state based on wavefront (particles above wave = active)
         const targetState = p.oy < waveY ? 1 : 0;
-        p.state = lerp(p.state, targetState, 0.018);
+        p.state = lerp(p.state, targetState, 0.03);
 
-        // Mouse repulsion
         if (mx >= 0) {
           const dx = p.x - mx;
           const dy = p.y - my * (H / Math.max(document.body.scrollHeight, H));
@@ -129,94 +149,51 @@ export const GlobalParticleField = memo(function GlobalParticleField() {
           }
         }
 
-        // Spring back to origin
         p.vx += (p.ox - p.x) * SPRING_BACK;
         p.vy += (p.oy - p.y) * SPRING_BACK;
         p.vx *= FRICTION;
         p.vy *= FRICTION;
-        p.x  += p.vx;
-        p.y  += p.vy;
-
-        // Twinkling phase
-        p.twinkle += 0.018 + p.state * 0.012;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.twinkle += 0.03 + p.state * 0.02;
       }
 
-      // ── Draw connection lines ─────────────────────────────────────────
-      for (let i = 0; i < ps.length; i++) {
+      // Sparse connections — sample every other particle to cut O(n²)
+      for (let i = 0; i < ps.length; i += 2) {
         const a = ps[i];
-        for (let j = i + 1; j < ps.length; j++) {
+        for (let j = i + 2; j < ps.length; j += 2) {
           const b = ps[j];
           const dx = a.x - b.x;
           const dy = a.y - b.y;
-          const d  = Math.sqrt(dx * dx + dy * dy);
+          const d = Math.sqrt(dx * dx + dy * dy);
           if (d > CONNECTION_DIST) continue;
-
-          const alpha   = (1 - d / CONNECTION_DIST) * 0.35;
+          const alpha = (1 - d / CONNECTION_DIST) * 0.3;
           const blended = Math.max(a.state, b.state);
-
-          const [r, g, bl] = [
-            lerp(C_LINE_S[0], C_LINE_A[0], blended),
-            lerp(C_LINE_S[1], C_LINE_A[1], blended),
-            lerp(C_LINE_S[2], C_LINE_A[2], blended),
-          ];
-
+          const r = lerp(C_LINE_S[0], C_LINE_A[0], blended);
+          const g = lerp(C_LINE_S[1], C_LINE_A[1], blended);
+          const bl = lerp(C_LINE_S[2], C_LINE_A[2], blended);
           ctx.beginPath();
           ctx.moveTo(a.x * W, a.y * H);
           ctx.lineTo(b.x * W, b.y * H);
           ctx.strokeStyle = `rgba(${r},${g},${bl},${alpha})`;
-          ctx.lineWidth   = 0.6;
+          ctx.lineWidth = 0.6;
           ctx.stroke();
         }
       }
 
-      // ── Draw particles ────────────────────────────────────────────────
       for (const p of ps) {
         const px = p.x * W;
         const py = p.y * H;
         const tw = 0.5 + 0.5 * Math.sin(p.twinkle);
         const sz = p.size * (0.85 + tw * 0.3 + p.state * 0.4);
-
-        const [r, g, b] = [
-          lerp(C_SLEEP[0], C_ACTIVE[0], p.state),
-          lerp(C_SLEEP[1], C_ACTIVE[1], p.state),
-          lerp(C_SLEEP[2], C_ACTIVE[2], p.state),
-        ];
-
-        // Glow halo for active particles
-        if (p.state > 0.1) {
-          const glowAlpha = p.state * tw * 0.25;
-          const grd = ctx.createRadialGradient(px, py, 0, px, py, sz * 5);
-          grd.addColorStop(0, `rgba(${r},${g},${b},${glowAlpha})`);
-          grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
-          ctx.beginPath();
-          ctx.arc(px, py, sz * 5, 0, Math.PI * 2);
-          ctx.fillStyle = grd;
-          ctx.fill();
-        }
-
-        // Particle dot
+        const r = lerp(C_SLEEP[0], C_ACTIVE[0], p.state);
+        const g = lerp(C_SLEEP[1], C_ACTIVE[1], p.state);
+        const b = lerp(C_SLEEP[2], C_ACTIVE[2], p.state);
         const alpha = 0.35 + p.state * 0.55 + tw * 0.1;
         ctx.beginPath();
         ctx.arc(px, py, sz, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
         ctx.fill();
-      }
-
-      // ── Activation wavefront glow line ────────────────────────────────
-      if (waveY > 0 && waveY < 1) {
-        const wy = waveY * H;
-        const grad = ctx.createLinearGradient(0, wy, W, wy);
-        grad.addColorStop(0,   "rgba(16,185,129,0)");
-        grad.addColorStop(0.3, "rgba(16,185,129,0.07)");
-        grad.addColorStop(0.5, "rgba(16,185,129,0.14)");
-        grad.addColorStop(0.7, "rgba(16,185,129,0.07)");
-        grad.addColorStop(1,   "rgba(16,185,129,0)");
-        ctx.beginPath();
-        ctx.moveTo(0, wy);
-        ctx.lineTo(W, wy);
-        ctx.strokeStyle = grad as unknown as string;
-        ctx.lineWidth   = 1.5;
-        ctx.stroke();
       }
     };
 
@@ -224,6 +201,7 @@ export const GlobalParticleField = memo(function GlobalParticleField() {
     return () => {
       cancelAnimationFrame(raf.current);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
@@ -232,7 +210,7 @@ export const GlobalParticleField = memo(function GlobalParticleField() {
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
       aria-hidden
-      style={{ opacity: 0.75 }}
+      style={{ opacity: 0.65 }}
     />
   );
 });

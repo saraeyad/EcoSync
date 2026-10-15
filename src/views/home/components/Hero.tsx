@@ -1,8 +1,11 @@
-import { useRef, useCallback, type MouseEvent } from "react";
+import { useRef, useCallback, lazy, Suspense, type MouseEvent } from "react";
 import { motion, useMotionValue, useSpring, useMotionValueEvent } from "framer-motion";
 import { ChevronDown, Zap, Globe, Shield } from "lucide-react";
-import { HeroScene } from "./HeroScene.tsx";
 import { PortalButton } from "../../../components/ui/PortalTransition.tsx";
+
+const HeroScene = lazy(() =>
+  import("./HeroScene.tsx").then((m) => ({ default: m.HeroScene })),
+);
 
 const pills = [
   { icon: Zap,    label: "Real-time Monitoring" },
@@ -182,7 +185,15 @@ export function Hero() {
               </motion.div>
             ))}
 
-            <HeroScene mousePos={mousePos} />
+            <Suspense
+              fallback={
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-48 h-48 rounded-full bg-emerald-500/10 blur-2xl" />
+                </div>
+              }
+            >
+              <HeroScene mousePos={mousePos} />
+            </Suspense>
           </motion.div>
         </div>
       </div>

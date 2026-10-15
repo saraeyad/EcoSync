@@ -1,8 +1,7 @@
-import { useRef, type FC, Suspense, memo } from "react";
+import { useRef, type FC, memo } from "react";
 import { motion, useInView } from "framer-motion";
 import { Activity, BarChart3, Globe2, Cpu, ShieldCheck, Zap, Leaf, type LucideIcon } from "lucide-react";
 import { ScrollReveal } from "../../../components/ui/ScrollReveal.tsx";
-import { MiniBarChart, MiniGlobe, MiniOrbit } from "./BentoMiniCanvas.tsx";
 
 interface Feature {
   id: number;
@@ -96,14 +95,49 @@ const FeatureCard: FC<{ feature: Feature; index: number }> = memo(({ feature, in
       {/* Compliance tags */}
       {feature.id === 5 && <ComplianceVisual />}
 
-      {/* Mini 3D canvas */}
+      {/* Lightweight CSS visual — avoids extra WebGL canvases on the landing page */}
       {miniCanvas && (
-        <div className="h-28 mt-4 -mx-2 rounded-xl overflow-hidden">
-          <Suspense fallback={<div className="h-full bg-slate-800/40 animate-pulse rounded-xl" />}>
-            {miniCanvas === "bars"  && <MiniBarChart color={accent} />}
-            {miniCanvas === "globe" && <MiniGlobe    color={accent} />}
-            {miniCanvas === "orbit" && <MiniOrbit    color={accent} />}
-          </Suspense>
+        <div
+          className="h-20 mt-4 -mx-2 rounded-xl overflow-hidden flex items-end justify-center gap-1.5 px-4 pb-3"
+          style={{
+            background: `linear-gradient(180deg, ${accent}08, transparent)`,
+            border: `1px solid ${accent}18`,
+          }}
+        >
+          {miniCanvas === "bars" &&
+            [40, 70, 55, 90, 65, 80, 50].map((h, i) => (
+              <motion.span
+                key={i}
+                className="w-2 rounded-sm"
+                style={{ background: accent, height: `${h}%`, opacity: 0.55 + (i % 3) * 0.1 }}
+                animate={{ scaleY: [0.85, 1.15, 0.9, 1] }}
+                transition={{ duration: 2.4 + i * 0.15, repeat: Infinity, ease: "easeInOut" }}
+              />
+            ))}
+          {miniCanvas === "globe" && (
+            <motion.div
+              className="w-14 h-14 rounded-full border"
+              style={{ borderColor: `${accent}55`, boxShadow: `inset 0 0 18px ${accent}33` }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+            />
+          )}
+          {miniCanvas === "orbit" && (
+            <motion.div
+              className="relative w-14 h-14"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            >
+              <span
+                className="absolute inset-2 rounded-full"
+                style={{ background: `${accent}22`, border: `1px solid ${accent}40` }}
+              />
+              <span
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full"
+                style={{ background: accent }}
+              />
+            </motion.div>
+          )}
         </div>
       )}
     </motion.div>

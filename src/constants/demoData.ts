@@ -156,11 +156,3 @@ export function isNetworkFetchError(message: string): boolean {
   );
 }
 
-export function supabaseUnreachableMessage(scope: string): string {
-  return (
-    `${scope}: cannot reach Supabase (Failed to fetch). ` +
-    `The project URL may be paused/deleted, or Vercel env vars are wrong. ` +
-    `Showing demo data. Fix: restore the project in Supabase → update ` +
-    `VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY on Vercel → redeploy.`
-  );
-}

@@ -3,9 +3,8 @@ import { generateEnergyData } from "../constants/energy.ts";
 import {
   DEMO_FACTORIES,
   isNetworkFetchError,
-  supabaseUnreachableMessage,
 } from "../constants/demoData.ts";
-import { supabase, hasSupabase } from "../lib/supabase.ts";
+import { supabase } from "../lib/supabase.ts";
 import {
   mapFactoryRow,
   buildStreamsFromFactories,
@@ -16,24 +15,23 @@ import {
 type SetState = (partial: object | ((s: object) => object)) => void;
 type GetState = () => object;
 
-function applyDemoFactories(set: SetState, warning: string | null) {
+/** Use demo factories quietly — no banner spam when backend is down. */
+function applyDemoFactories(set: SetState) {
+  if (import.meta.env.DEV) {
+    console.info("[EcoSync] Using demo factory data (Supabase unavailable or unset).");
+  }
   set({
     factories: DEMO_FACTORIES,
     factoryStreams: buildStreamsFromFactories(DEMO_FACTORIES),
     factoriesLoaded: true,
-    supabaseError: warning,
+    supabaseError: null,
   });
 }
 
 export function createLoadFactories(set: SetState) {
   return async function loadFactories() {
     if (!supabase) {
-      applyDemoFactories(
-        set,
-        hasSupabase
-          ? null
-          : "Supabase not configured — showing demo data. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart / redeploy."
-      );
+      applyDemoFactories(set);
       return;
     }
 
@@ -48,7 +46,7 @@ export function createLoadFactories(set: SetState) {
       if (error) {
         console.warn("[EcoSync] loadFactories failed:", error.message);
         if (isNetworkFetchError(error.message)) {
-          applyDemoFactories(set, supabaseUnreachableMessage("Factories"));
+          applyDemoFactories(set);
           return;
         }
         let msg = `Factories: ${error.message}`;
@@ -88,7 +86,7 @@ export function createLoadFactories(set: SetState) {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.warn("[EcoSync] loadFactories threw:", message);
-      applyDemoFactories(set, supabaseUnreachableMessage("Factories"));
+      applyDemoFactories(set);
     }
   };
 }

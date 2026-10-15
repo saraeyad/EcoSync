@@ -11,15 +11,20 @@ import {
 import { Sidebar, MobileSidebar } from "./components/Sidebar.tsx";
 import { TopBar } from "./components/TopBar.tsx";
 import { WorldMap } from "./components/WorldMap.tsx";
-import { CarbonVaultCard } from "./components/CarbonVaultCard.tsx";
 import { HeartbeatChart } from "./components/HeartbeatChart.tsx";
 import { AlertsPanel } from "./components/AlertsPanel.tsx";
 import { MetricCard } from "./components/MetricCard.tsx";
 import { FactoryDetailPanel } from "./components/FactoryDetail.tsx";
 import { FactoryFlipCard } from "./components/FactoryFlipCard.tsx";
-import { BackgroundParticles } from "./components/BackgroundParticles.tsx";
 import { useAppStore } from "../../hooks/useStore.ts";
 import { hasSupabase } from "../../lib/supabase.ts";
+
+// Defer Three.js vault until after Command Center paint
+const CarbonVaultCard = lazy(() =>
+  import("./components/CarbonVaultCard.tsx").then((m) => ({
+    default: m.CarbonVaultCard,
+  })),
+);
 
 // Views for each nav tab (lazy so heavy charts/maps load only when tab is opened)
 const FactoriesView = lazy(() =>
@@ -68,10 +73,10 @@ const ProfilePage = lazy(() =>
 function PageView({ children }: { children: ReactNode }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </motion.div>
@@ -167,7 +172,15 @@ function CommandCenter() {
         <div className="lg:col-span-2">
           <WorldMap />
         </div>
-        <CarbonVaultCard />
+        <Suspense
+          fallback={
+            <div className="bento-card min-h-[420px] flex items-center justify-center text-slate-500 text-sm">
+              Loading vault…
+            </div>
+          }
+        >
+          <CarbonVaultCard />
+        </Suspense>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -339,12 +352,12 @@ export function DashboardPage() {
       transition={{ duration: 0.5 }}
       className="flex h-screen bg-background overflow-hidden relative"
     >
-      <BackgroundParticles />
       <MobileSidebar />
       <Sidebar />
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative z-10">
         <TopBar />
+        {/* Only show DB banners for real config/RLS issues — not demo fallback */}
         <SupabaseConnectionBanner />
         <NoDataHint />
 

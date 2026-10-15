@@ -74,11 +74,12 @@ export function CarbonVaultCard() {
         <Canvas
           camera={{ position: [0, 0, 3.2], fov: 42 }}
           gl={{
-            antialias: true,
+            antialias: false,
             alpha: true,
-            powerPreference: "high-performance",
+            powerPreference: "low-power",
           }}
-          dpr={[1, 1.5]}
+          dpr={1}
+          frameloop="always"
           style={{
             background: "transparent",
             width: "100%",
@@ -92,7 +93,7 @@ export function CarbonVaultCard() {
             enableZoom={false}
             enablePan={false}
             autoRotate
-            autoRotateSpeed={0.8}
+            autoRotateSpeed={0.5}
             minPolarAngle={Math.PI / 4}
             maxPolarAngle={(3 * Math.PI) / 4}
           />
